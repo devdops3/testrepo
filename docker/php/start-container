@@ -1,0 +1,27 @@
+#!/bin/sh
+# Rest of your script
+
+# Path to a flag file indicating migrations were completed
+MIGRATION_FLAG="/var/www/laravel/storage/migrations_completed.flag"
+
+# Run migrations only if they haven't been run before
+if [ ! -f "$MIGRATION_FLAG" ]; then
+    echo "Running migrations..."
+
+    cd /var/www/laravel
+    composer install
+    chown -R $USER:www-data storage
+    chown -R $USER:www-data bootstrap/cache
+    chmod -R 775 storage
+    chmod -R 775 bootstrap/cache
+    cp .env.example .env
+    php artisan key:generate
+
+    # Create the flag file to indicate completion
+    touch "$MIGRATION_FLAG"
+else
+    echo "Migrations already completed."
+fi
+
+# Continue with other startup commands...
+exec php-fpm
